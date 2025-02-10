@@ -40,21 +40,56 @@ function Write-Log {
     Write-Host "[$timestamp] $message"
 }
 
+# Function to Get Current User, Groups, and Privileges
+function Get-UserInfo {
+    Write-Log "Enumerating current user information..."
+
+    # Get current user
+    $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+    $username = $currentUser.Name
+    $groups = $currentUser.Groups | ForEach-Object { 
+        try {
+            $_.Translate([System.Security.Principal.NTAccount]).Value
+        } catch {
+            $_.Value
+        }
+    }
+
+    Write-Host "`n[+] Current User Information:" -ForegroundColor Green
+    Write-Host "    Username: $username"
+
+    # Check if user has Administrator rights
+    $adminCheck = [System.Security.Principal.WindowsPrincipal]::new($currentUser).IsInRole([System.Security.Principal.WindowsBuiltinRole]::Administrator)
+    Write-Host "    Is Administrator: $adminCheck"
+
+    # Display group memberships
+    Write-Host "`n[+] Group Memberships:" -ForegroundColor Green
+    foreach ($group in $groups) {
+        Write-Host "    - $group"
+    }
+
+    # Get user privileges (SeDebugPrivilege, SeImpersonatePrivilege, etc.)
+    Write-Host "`n[+] Assigned Privileges:" -ForegroundColor Green
+    $privileges = whoami /priv
+    if ($privileges) {
+        Write-Host $privileges
+    } else {
+        Write-Host "    No privileges found or user lacks permission to query." -ForegroundColor Yellow
+    }
+
+    Write-Host "`n"
+}
+
 # Basic System Enumeration
 function Get-SystemInfo {
     Write-Log "Gathering system information..."
     $os = Get-WmiObject Win32_OperatingSystem
-    $user = [System.Security.Principal.WindowsIdentity]::GetCurrent()
 
     Write-Host "`n[+] OS Information:" -ForegroundColor Green
     Write-Host "    Name: $($os.Caption) ($($os.Version))"
     Write-Host "    Architecture: $($os.OSArchitecture)"
     Write-Host "    Build Number: $($os.BuildNumber)"
-    Write-Host "    Install Date: $($os.InstallDate)"
-    
-    Write-Host "`n[+] User Information:" -ForegroundColor Green
-    Write-Host "    Username: $($user.Name)"
-    Write-Host "    Is Admin: $( [System.Security.Principal.WindowsBuiltinRole]::Administrator -in ($user.Groups | ForEach-Object { $_.Value }) )"
+    Write-Host "    Install Date: $($os.ConvertToDateTime($os.InstallDate))"
 
     Write-Host "`n"
 }
@@ -63,6 +98,7 @@ function Get-SystemInfo {
 function Start-MagicWinPwn {
     Show-Banner
     Get-SystemInfo
+    Get-UserInfo
     Write-Log "Enumeration complete."
 }
 
