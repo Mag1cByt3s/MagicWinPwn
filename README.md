@@ -45,6 +45,8 @@ To execute **MagicWinPwn**, open **PowerShell** and run:
 
 ---
 
+<br>
+
 ## Privilege Escalation Checks
 
 MagicWinPwn automates various **Windows privilege escalation techniques**, including:
@@ -59,6 +61,10 @@ MagicWinPwn automates various **Windows privilege escalation techniques**, inclu
 
 <br>
 
+---
+
+<br>
+
 ## Example Output
 ```powershell
 [+] OS Information: Name: Windows 10 Pro (10.0.19044) Architecture: x64 Build Number: 19044 Install Date: 2022-03-15
@@ -70,6 +76,10 @@ MagicWinPwn automates various **Windows privilege escalation techniques**, inclu
 [+] Writable Directories: - C:\Program Files\VulnerableApp
 [!] Exploit: Drop malicious DLL for privilege escalation
 ```
+
+<br>
+
+---
 
 <br>
 
