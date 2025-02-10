@@ -68,11 +68,17 @@ function Get-UserInfo {
         Write-Host "    - $group"
     }
 
-    # Get user privileges (SeDebugPrivilege, SeImpersonatePrivilege, etc.)
+    # Get user privileges (SeDebugPrivilege, SeImpersonatePrivilege, etc.) with proper formatting
     Write-Host "`n[+] Assigned Privileges:" -ForegroundColor Green
-    $privileges = whoami /priv
-    if ($privileges) {
-        Write-Host $privileges
+    $privileges = whoami /priv | ForEach-Object { $_ -replace "\s{2,}", " | " }  # Replace multiple spaces with a separator
+    if ($privileges -match "Privilege Name") {
+        Write-Host "`n    Privilege Name                    | Description                                     | State" -ForegroundColor Cyan
+        Write-Host "    --------------------------------------------------------------------------" -ForegroundColor Cyan
+        $privileges | Select-Object -Skip 1 | ForEach-Object { 
+            if ($_ -match "(Se\S+)\s+\|\s+(.+?)\s+\|\s+(Enabled|Disabled)") {
+                Write-Host ("    {0,-35} | {1,-50} | {2}" -f $matches[1], $matches[2], $matches[3]) 
+            }
+        }
     } else {
         Write-Host "    No privileges found or user lacks permission to query." -ForegroundColor Yellow
     }
