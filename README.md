@@ -11,7 +11,7 @@ MagicWinPwn is a powerful and automated Windows privilege escalation script desi
 ## Usage
 
 ### Running the Script
-To execute **MagicWinPwn**, open **PowerShell** and run:
+To execute **MagicWinPwn** run:
 ```powershell
 powershell -ep bypass -f .\MagicWinPwn.ps1
 ```
