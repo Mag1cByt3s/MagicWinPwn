@@ -76,7 +76,7 @@ function Get-UserInfo {
         Write-Host "    -----------------------------------------------------------------------------------" -ForegroundColor Cyan
         $privileges | Select-Object -Skip 1 | ForEach-Object { 
             if ($_ -match "(Se\S+)\s+\|\s+(.+?)\s+\|\s+(Enabled|Disabled)") {
-                Write-Host ("    {0,-32} | {1,-48} | {2}" -f $matches[1], $matches[2], $matches[3]) 
+                Write-Host ("    {0,-33} | {1,-45} | {2}" -f $matches[1], $matches[2], $matches[3]) 
             }
         }
     } else {
