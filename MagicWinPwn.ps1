@@ -72,8 +72,8 @@ function Get-UserInfo {
     Write-Host "`n[+] Assigned Privileges:" -ForegroundColor Green
     $privileges = whoami /priv | ForEach-Object { $_ -replace "\s{2,}", " | " }  # Replace multiple spaces with a separator
     if ($privileges -match "Privilege Name") {
-        Write-Host "`n    Privilege Name                    | Description                                 | State" -ForegroundColor Cyan
-        Write-Host "    -----------------------------------------------------------------------------------------------" -ForegroundColor Cyan
+        Write-Host "`n    Privilege Name                    | Description                                   | State" -ForegroundColor Cyan
+        Write-Host "    --------------------------------------------------------------------------------------------" -ForegroundColor Cyan
         $privileges | Select-Object -Skip 1 | ForEach-Object { 
             if ($_ -match "(Se\S+)\s+\|\s+(.+?)\s+\|\s+(Enabled|Disabled)") {
                 Write-Host ("    {0,-33} | {1,-45} | {2}" -f $matches[1], $matches[2], $matches[3]) 
