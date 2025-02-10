@@ -14,16 +14,13 @@
 
 # Function to Display ASCII Art Banner
 function Show-Banner {
-    $asciiArt = @"
-  __  __                   _         __        __  _           ____                     
- |  \/  |   __ _    __ _  (_)   ___  \ \      / / (_)  _ __   |  _ \  __      __  _ __  
- | |\/| |  / _` |  / _` | | |  / __|  \ \ /\ / /  | | | '_ \  | |_) | \ \ /\ / / | '_ \ 
- | |  | | | (_| | | (_| | | | | (__    \ V  V /   | | | | | | |  __/   \ V  V /  | | | |
- |_|  |_|  \__,_|  \__, | |_|  \___|    \_/\_/    |_| |_| |_| |_|       \_/\_/   |_| |_|
-                   |___/                                                                
-"@
     Write-Host "`n" -ForegroundColor DarkMagenta
-    Write-Host $asciiArt -ForegroundColor Magenta
+    Write-Host -ForegroundColor DarkMagenta "__  __                   _         __        __  _           ____"
+    Write-Host -ForegroundColor DarkMagenta "|  \/  |   __ _    __ _  (_)   ___  \ \      / / (_)  _ __   |  _ \  __      __  _ __"
+    Write-Host -ForegroundColor DarkMagenta "| |\/| |  / _` |  /  _`| | |  / __|  \ \ /\ / /  | | | '_ \  | |_) | \ \ /\ / / | '_ \"
+    Write-Host -ForegroundColor DarkMagenta "| |  | | | (_| | | (_| | | | | (__    \ V  V /   | | | | | | |  __/   \ V  V /  | | | |"
+    Write-Host -ForegroundColor DarkMagenta "|_|  |_|  \__,_|  \__, | |_|  \___|    \_/\_/    |_| |_| |_| |_|       \_/\_/   |_| |_|"
+    Write-Host -ForegroundColor DarkMagenta "                   |___/"                                                                
     Write-Host "         Windows Privilege Escalation Script" -ForegroundColor Cyan
     Write-Host "                    By @Mag1cByt3s" -ForegroundColor Yellow
     Write-Host "    (https://github.com/Mag1cByt3s/MagicWinPwn)" -ForegroundColor DarkGray
