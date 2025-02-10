@@ -15,7 +15,7 @@
 # Function to Display ASCII Art Banner
 function Show-Banner {
     Write-Host "`n" -ForegroundColor DarkMagenta
-    Write-Host -ForegroundColor DarkMagenta "__  __                   _         __        __  _           ____"
+    Write-Host -ForegroundColor DarkMagenta " __  __                   _         __        __  _           ____"
     Write-Host -ForegroundColor DarkMagenta "|  \/  |   __ _    __ _  (_)   ___  \ \      / / (_)  _ __   |  _ \  __      __  _ __"
     Write-Host -ForegroundColor DarkMagenta "| |\/| |  / _` |  /  _`| | |  / __|  \ \ /\ / /  | | | '_ \  | |_) | \ \ /\ / / | '_ \"
     Write-Host -ForegroundColor DarkMagenta "| |  | | | (_| | | (_| | | | | (__    \ V  V /   | | | | | | |  __/   \ V  V /  | | | |"
