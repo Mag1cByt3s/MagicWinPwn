@@ -6,7 +6,7 @@
     MagicWinPwn is a powerful and automated Windows privilege escalation
     script designed to help security professionals and CTF enthusiasts
     uncover potential misconfigurations, vulnerabilities, and weaknesses
-    that can lead to privilege escalation. 
+    that can lead to privilege escalation.
 
 .AUTHOR
     MagicBytes (@Mag1cByt3s)
@@ -173,74 +173,99 @@ function Get-DefenderStatus {
 }
 
 function Get-AppLockerRules {
-    Write-Host "`n[+] AppLocker Policy Rules:" -ForegroundColor Green
+    # Test common executables against AppLocker policy
+    Write-Host "`n[+] Testing Common Executables Against AppLocker Policy:" -ForegroundColor Green
+    $testPaths = @(
+        # Core Windows utilities
+        "C:\Windows\System32\cmd.exe",
+        "C:\Windows\System32\powershell.exe",
+        "C:\Windows\System32\powershell_ise.exe",
+        "C:\Windows\System32\wscript.exe",
+        "C:\Windows\System32\cscript.exe",
+        "C:\Windows\System32\wmic.exe",
+        "C:\Windows\System32\mshta.exe",
+        "C:\Windows\System32\rundll32.exe",
+        "C:\Windows\System32\regsvr32.exe",
+        "C:\Windows\System32\regasm.exe",
+        "C:\Windows\System32\regsvcs.exe",
+        "C:\Windows\System32\msbuild.exe",
+        "C:\Windows\System32\scriptrunner.exe",
+        "C:\Windows\System32\bash.exe",
+        "C:\Windows\System32\certutil.exe",
+        "C:\Windows\System32\bitsadmin.exe",
+        "C:\Windows\System32\at.exe",
+        "C:\Windows\System32\schtasks.exe",
+        "C:\Windows\System32\winrs.exe",
     
-    try {
-        # Check if AppLocker is available
-        $appLockerPolicy = Get-AppLockerPolicy -Effective -ErrorAction Stop
-        
-        if ($appLockerPolicy.RuleCollections.Count -eq 0) {
-            Write-Host "    No AppLocker rules found" -ForegroundColor Yellow
-            return
+        # Additional living-off-the-land binaries (LOLBins)
+        "C:\Windows\System32\control.exe",
+        "C:\Windows\System32\cmstp.exe",
+        "C:\Windows\System32\dnscmd.exe",
+        "C:\Windows\System32\esentutl.exe",
+        "C:\Windows\System32\expand.exe",
+        "C:\Windows\System32\extrac32.exe",
+        "C:\Windows\System32\findstr.exe",
+        "C:\Windows\System32\forfiles.exe",
+        "C:\Windows\System32\ftp.exe",
+        "C:\Windows\System32\ieexec.exe",
+        "C:\Windows\System32\makecab.exe",
+        "C:\Windows\System32\mavinject.exe",
+        "C:\Windows\System32\mftrace.exe",
+        "C:\Windows\System32\msxsl.exe",
+        "C:\Windows\System32\odbcconf.exe",
+        "C:\Windows\System32\pcalua.exe",
+        "C:\Windows\System32\pcwrun.exe",
+        "C:\Windows\System32\presentationhost.exe",
+        "C:\Windows\System32\print.exe",
+        "C:\Windows\System32\replace.exe",
+        "C:\Windows\System32\robocopy.exe",
+        "C:\Windows\System32\runas.exe",
+        "C:\Windows\System32\syncappvpublishingserver.exe",
+        "C:\Windows\System32\wbem\wmic.exe",
+        "C:\Windows\System32\winsat.exe",
+        "C:\Windows\System32\workfolders.exe",
+    
+        # Microsoft Office applications (if installed)
+        "C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE",
+        "C:\Program Files\Microsoft Office\root\Office16\EXCEL.EXE",
+        "C:\Program Files\Microsoft Office\root\Office16\POWERPNT.EXE",
+        "C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE",
+        "C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.EXE",
+        "C:\Program Files (x86)\Microsoft Office\root\Office16\EXCEL.EXE",
+    
+        # Microsoft Visual Studio tools (if installed)
+        "C:\Windows\Microsoft.NET\Framework\v4.0.30319\InstallUtil.exe",
+        "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe",
+        "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\gacutil.exe",
+    
+        # Python (if installed)
+        "C:\Python27\python.exe",
+        "C:\Python3\python.exe",
+        "C:\Users\Public\Python\python.exe",
+    
+        # Git (if installed)
+        "C:\Program Files\Git\bin\sh.exe",
+        "C:\Program Files\Git\usr\bin\sh.exe",
+    
+        # Other common utilities
+        "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
+        "C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe",
+        "C:\Windows\System32\WindowsPowerShell\v1.0\powershell_ise.exe"
+    )
+
+    # Filter to only include paths that exist
+    $existingPaths = $testPaths | Where-Object { Test-Path $_ }
+
+    foreach ($path in $existingPaths) {
+        try {
+            $result = Get-AppLockerPolicy -Effective | Test-AppLockerPolicy -Path $path -User Everyone
+            $decision = $result.PolicyDecision
+            $color = if ($decision -eq "Denied") { "Red" } else { "Green" }
+            Write-Host "    $path : $decision" -ForegroundColor $color
         }
-        
-        # Display rule collections
-        $ruleCollections = $appLockerPolicy | Select-Object -ExpandProperty RuleCollections
-        
-        foreach ($collection in $ruleCollections) {
-            Write-Host "    Rule Collection: $($collection.GetType().Name)" -ForegroundColor Cyan
-            
-            # Display key properties
-            Write-Host "      Name: $($collection.Name)"
-            Write-Host "      Action: $($collection.Action)"
-            Write-Host "      Description: $($collection.Description)"
-            
-            # Display conditions
-            if ($collection.PathConditions) {
-                Write-Host "      Path Conditions:" -ForegroundColor Gray
-                foreach ($condition in $collection.PathConditions) {
-                    Write-Host "        - $condition"
-                }
-            }
-            
-            if ($collection.PublisherConditions) {
-                Write-Host "      Publisher Conditions:" -ForegroundColor Gray
-                foreach ($condition in $collection.PublisherConditions) {
-                    Write-Host "        - $condition"
-                }
-            }
-            
-            Write-Host ""
+        catch {
+            Write-Host "    $path : Error testing policy - $_" -ForegroundColor Yellow
         }
-        
-        # Test common executables against AppLocker policy
-        Write-Host "`n[+] Testing Common Executables Against AppLocker Policy:" -ForegroundColor Green
-        $testPaths = @(
-            "C:\Windows\System32\cmd.exe",
-            "C:\Windows\System32\powershell.exe",
-            "C:\Windows\System32\wscript.exe",
-            "C:\Windows\System32\cscript.exe"
-        )
-        
-        foreach ($path in $testPaths) {
-            if (Test-Path $path) {
-                try {
-                    $result = Get-AppLockerPolicy -Effective | Test-AppLockerPolicy -Path $path -User Everyone
-                    $decision = $result.PolicyDecision
-                    $color = if ($decision -eq "Denied") { "Red" } else { "Green" }
-                    Write-Host "    $path : $decision" -ForegroundColor $color
-                }
-                catch {
-                    Write-Host "    $path : Error testing policy - $_" -ForegroundColor Yellow
-                }
-            }
-        }
-    }
-    catch [System.Management.Automation.CommandNotFoundException] {
-        Write-Host "    AppLocker module not available or not installed" -ForegroundColor Yellow
-    }
-    catch {
-        Write-Host "    Error retrieving AppLocker policy: $_" -ForegroundColor Red
     }
 }
 

@@ -65,6 +65,17 @@ MagicWinPwn automates various **Windows privilege escalation techniques**, inclu
 
 <br>
 
+## Advanced Security Checks
+
+MagicWinPwn includes advanced security control enumeration:
+
+- **AppLocker Policy Analysis**: Tests over 40 common executables against AppLocker policies
+  - **LOLBins Testing**: Checks restrictions on living-off-the-land binaries commonly used in attacks
+  - **Writable Directory Identification**: Highlights common bypass locations for AppLocker restrictions
+- **Comprehensive Defender Status**: Detailed Windows Defender protection feature enumeration
+
+<br>
+
 ---
 
 <br>
