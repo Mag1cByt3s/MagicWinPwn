@@ -213,6 +213,9 @@ function Get-NetworkInfo {
     
     # Get Routing Table
     Get-RoutingTable
+
+    # Get Listening Ports
+    Get-ListeningPorts
     
     Write-Host "`n"
 }
@@ -233,6 +236,32 @@ function Get-RoutingTable {
     Write-Host "`n[+] Routing Table:" -ForegroundColor Green
     $route = route print
     $route | ForEach-Object { Write-Host "    $_" }
+}
+
+function Get-ListeningPorts {
+    Write-Host "`n[+] Listening Ports:" -ForegroundColor Green
+    try {
+        $netstat = netstat -ano | Select-String "LISTENING"
+        if ($netstat) {
+            Write-Host "    Proto  Local Address          Process ID  Process Name" -ForegroundColor Cyan
+            Write-Host "    -----------------------------------------------------" -ForegroundColor Cyan
+            $netstat | ForEach-Object {
+                $line = $_.ToString().Trim()
+                if ($line -match "TCP\s+(.+?)\s+.+?\s+LISTENING\s+(\d+)") {
+                    $localAddr = $matches[1]
+                    $processId = $matches[2]
+                    $processName = try { (Get-Process -Id $processId -ErrorAction Stop).ProcessName } catch { "Unknown" }
+                    Write-Host ("    {0,-7} {1,-22} {2,-11} {3}" -f "TCP", $localAddr, $processId, $processName) -ForegroundColor Gray
+                }
+            }
+        }
+        else {
+            Write-Host "    No listening TCP ports found" -ForegroundColor Yellow
+        }
+    }
+    catch {
+        Write-Host "    Error retrieving listening ports: $_" -ForegroundColor Red
+    }
 }
 
 # Security Enumeration Functions

@@ -61,7 +61,7 @@ MagicWinPwn automates various **Windows privilege escalation techniques**, inclu
 
 - **Basic System Information** (OS, user privileges, architecture)
 - **User Privileges & Groups** (Identifies admin access & privilege levels)
-- **Network Configuration** (Interfaces, IP addresses, DNS, ARP, routing)
+- **Network Configuration** (Interfaces, IP addresses, DNS, ARP, routing table, listening ports)
 - **Security Controls** (Windows Defender status, AppLocker policies)
 - **Service Misconfigurations** (Unquoted service paths, weak permissions)
 - **Scheduled Tasks & Startup Applications** (Auto-elevated execution paths)
