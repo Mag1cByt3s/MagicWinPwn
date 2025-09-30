@@ -86,15 +86,118 @@ function Get-UserInfo {
 
 # Basic System Enumeration
 function Get-SystemInfo {
-    Write-Log "Gathering system information..."
-    $os = Get-WmiObject Win32_OperatingSystem
-
-    Write-Host "`n[+] OS Information:" -ForegroundColor Green
-    Write-Host "    Name: $($os.Caption) ($($os.Version))"
-    Write-Host "    Architecture: $($os.OSArchitecture)"
-    Write-Host "    Build Number: $($os.BuildNumber)"
-    Write-Host "    Install Date: $($os.ConvertToDateTime($os.InstallDate))"
-
+    Write-Log "Gathering enhanced system information..."
+    
+    # Get detailed system information
+    Write-Host "`n[+] Detailed System Information:" -ForegroundColor Green
+    try {
+        $systemInfo = systeminfo 2>$null
+        if ($systemInfo) {
+            # Display only key information
+            $systemInfo | Select-String "Host Name:|OS Name:|OS Version:|System Manufacturer:|System Model:|System Type:|Hotfix|System Boot Time:|Domain:" | ForEach-Object {
+                Write-Host "    $_" -ForegroundColor Gray
+            }
+        }
+        else {
+            Write-Host "    Unable to retrieve system information (insufficient privileges)" -ForegroundColor Yellow
+        }
+    }
+    catch {
+        Write-Host "    Error retrieving system information: $_" -ForegroundColor Red
+    }
+    
+    # Get environment variables
+    Write-Host "`n[+] Environment Variables:" -ForegroundColor Green
+    $envVars = @{
+        "PATH"                   = $env:PATH
+        "USERPROFILE"            = $env:USERPROFILE
+        "HOMEDRIVE"              = $env:HOMEDRIVE
+        "HOMEPATH"               = $env:HOMEPATH
+        "TEMP"                   = $env:TEMP
+        "APPDATA"                = $env:APPDATA
+        "LOCALAPPDATA"           = $env:LOCALAPPDATA
+        "COMPUTERNAME"           = $env:COMPUTERNAME
+        "USERNAME"               = $env:USERNAME
+        "PROCESSOR_ARCHITECTURE" = $env:PROCESSOR_ARCHITECTURE
+    }
+    
+    foreach ($var in $envVars.GetEnumerator()) {
+        Write-Host "    $($var.Key): $($var.Value)" -ForegroundColor Gray
+    }
+    
+    # Analyze PATH for potential issues
+    Write-Host "`n[+] PATH Analysis:" -ForegroundColor Green
+    $pathDirs = $env:PATH -split ';'
+    foreach ($dir in $pathDirs) {
+        if ($dir -and (Test-Path $dir -ErrorAction SilentlyContinue)) {
+            try {
+                $acl = Get-Acl $dir -ErrorAction Stop
+                $access = $acl.Access | Where-Object { 
+                    $_.IdentityReference -match "Users|Everyone|Authenticated Users" -and 
+                    $_.FileSystemRights -match "Write|Modify|FullControl" 
+                }
+                if ($access) {
+                    Write-Host "    [!] Writeable PATH directory: $dir" -ForegroundColor Red
+                }
+                else {
+                    Write-Host "    $dir" -ForegroundColor Gray
+                }
+            }
+            catch {
+                Write-Host "    $dir (Access Denied)" -ForegroundColor Yellow
+            }
+        }
+        elseif ($dir) {
+            Write-Host "    $dir (Does not exist)" -ForegroundColor Yellow
+        }
+    }
+    
+    # Get installed patches
+    Write-Host "`n[+] Installed Patches:" -ForegroundColor Green
+    try {
+        $patches = Get-HotFix | Sort-Object InstalledOn
+        $patches | ForEach-Object {
+            Write-Host "    $($_.HotFixID) - $($_.Description) - $($_.InstalledOn)" -ForegroundColor Gray
+        }
+    }
+    catch {
+        Write-Host "    Error retrieving patches: $_" -ForegroundColor Red
+    }
+    
+    # Get installed software
+    Write-Host "`n[+] Installed Software:" -ForegroundColor Green
+    try {
+        $software = Get-WmiObject -Class Win32_Product | Select-Object Name, Version
+        $software | ForEach-Object {
+            Write-Host "    $($_.Name) ($($_.Version))" -ForegroundColor Gray
+        }
+    }
+    catch {
+        Write-Host "    Error retrieving installed software (WMI access denied)" -ForegroundColor Yellow
+        Write-Host "    Trying alternative method..." -ForegroundColor Yellow
+        
+        # Alternative method using registry
+        try {
+            $regPaths = @(
+                "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
+                "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
+            )
+            
+            $software = $regPaths | ForEach-Object {
+                Get-ItemProperty $_ 2>$null | Where-Object { 
+                    $_.DisplayName -and $_.DisplayName -notmatch "Update|Hotfix|Security|Patch" 
+                }
+            } | Select-Object DisplayName, DisplayVersion | Sort-Object DisplayName -Unique
+            
+            $software | ForEach-Object {
+                Write-Host "    $($_.DisplayName) ($($_.DisplayVersion))" -ForegroundColor Gray
+            }
+        }
+        catch {
+            Write-Host "    Unable to retrieve installed software: $_" -ForegroundColor Red
+        }
+    }
+    
     Write-Host "`n"
 }
 
@@ -269,6 +372,143 @@ function Get-AppLockerRules {
     }
 }
 
+function Get-ProcessInfo {
+    Write-Log "Enumerating running processes..."
+    
+    Write-Host "`n[+] Running Processes:" -ForegroundColor Green
+    try {
+        $processes = Get-WmiObject Win32_Process | Select-Object ProcessId, Name, ExecutablePath, CommandLine
+        $processes | ForEach-Object {
+            Write-Host "    $($_.ProcessId): $($_.Name)" -ForegroundColor Gray
+            if ($_.ExecutablePath) {
+                Write-Host "        Path: $($_.ExecutablePath)" -ForegroundColor DarkGray
+            }
+            if ($_.CommandLine) {
+                Write-Host "        Cmd: $($_.CommandLine)" -ForegroundColor DarkGray
+            }
+        }
+    }
+    catch {
+        Write-Host "    Error retrieving process information: $_" -ForegroundColor Red
+    }
+    
+    Write-Host "`n"
+}
+
+function Get-UserEnumeration {
+    Write-Log "Enumerating user and group information..."
+    
+    # Get logged in users
+    Get-LoggedUsers
+    
+    # Get all users
+    Get-AllUsers
+    
+    # Get all groups
+    Get-AllGroups
+    
+    # Get password policy
+    Get-PasswordPolicy
+    
+    Write-Host "`n"
+}
+
+function Get-LoggedUsers {
+    Write-Host "`n[+] Logged-In Users:" -ForegroundColor Green
+    try {
+        $users = query user 2>$null
+        if ($users) {
+            $users | ForEach-Object { Write-Host "    $_" }
+        }
+        else {
+            Write-Host "    No other users currently logged in" -ForegroundColor Yellow
+        }
+    }
+    catch {
+        Write-Host "    Error retrieving logged-in users: $_" -ForegroundColor Red
+    }
+}
+
+function Get-AllUsers {
+    Write-Host "`n[+] All Users:" -ForegroundColor Green
+    try {
+        $users = net user 2>$null
+        if ($users) {
+            # Extract user names from the output
+            $userLines = $users | Select-String "User accounts for" -Context 0, 100
+            if ($userLines) {
+                $userLines.Context.PostContext | ForEach-Object {
+                    if ($_ -match "-------------------------------------------------------------------------------") {
+                        return
+                    }
+                    if ($_ -match "The command completed successfully") {
+                        return
+                    }
+                    if ($_ -match "\S") {
+                        $cleanLine = $_.Trim() -replace '\s{2,}', ' '
+                        $cleanLine.Split(' ') | ForEach-Object {
+                            if ($_ -match "\S") {
+                                Write-Host "    - $_" -ForegroundColor Gray
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    catch {
+        Write-Host "    Error retrieving user list: $_" -ForegroundColor Red
+    }
+}
+
+function Get-AllGroups {
+    Write-Host "`n[+] All Groups:" -ForegroundColor Green
+    try {
+        $groups = net localgroup 2>$null
+        if ($groups) {
+            # Extract group names from the output
+            $groupLines = $groups | Select-String "Aliases for" -Context 0, 100
+            if ($groupLines) {
+                $groupLines.Context.PostContext | ForEach-Object {
+                    if ($_ -match "-------------------------------------------------------------------------------") {
+                        return
+                    }
+                    if ($_ -match "The command completed successfully") {
+                        return
+                    }
+                    if ($_ -match "\*") {
+                        $_.Trim() -replace '\*', '' | ForEach-Object {
+                            if ($_ -match "\S") {
+                                Write-Host "    - $_" -ForegroundColor Gray
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    catch {
+        Write-Host "    Error retrieving group list: $_" -ForegroundColor Red
+    }
+}
+
+function Get-PasswordPolicy {
+    Write-Host "`n[+] Password Policy:" -ForegroundColor Green
+    try {
+        $policy = net accounts 2>$null
+        if ($policy) {
+            $policy | ForEach-Object {
+                if ($_ -match "\S" -and $_ -notmatch "The command completed successfully") {
+                    Write-Host "    $_" -ForegroundColor Gray
+                }
+            }
+        }
+    }
+    catch {
+        Write-Host "    Error retrieving password policy: $_" -ForegroundColor Red
+    }
+}
+
 # Main Execution
 function Start-MagicWinPwn {
     Show-Banner
@@ -276,6 +516,8 @@ function Start-MagicWinPwn {
     Get-UserInfo
     Get-NetworkInfo
     Get-SecurityInfo
+    Get-ProcessInfo
+    Get-UserEnumeration
     Write-Log "Enumeration complete."
 }
 
