@@ -46,7 +46,8 @@ function Get-UserInfo {
     $groups = $currentUser.Groups | ForEach-Object { 
         try {
             $_.Translate([System.Security.Principal.NTAccount]).Value
-        } catch {
+        }
+        catch {
             $_.Value
         }
     }
@@ -75,7 +76,8 @@ function Get-UserInfo {
                 Write-Host ("    {0,-33} | {1,-45} | {2}" -f $matches[1], $matches[2], $matches[3]) 
             }
         }
-    } else {
+    }
+    else {
         Write-Host "    No privileges found or user lacks permission to query." -ForegroundColor Yellow
     }
 
@@ -96,11 +98,159 @@ function Get-SystemInfo {
     Write-Host "`n"
 }
 
+# Network Enumeration Functions
+function Get-NetworkInfo {
+    Write-Log "Gathering network information..."
+    
+    # Get IP Configuration
+    Get-IPConfigInfo
+    
+    # Get ARP Table
+    Get-ARPTable
+    
+    # Get Routing Table
+    Get-RoutingTable
+    
+    Write-Host "`n"
+}
+
+function Get-IPConfigInfo {
+    Write-Host "`n[+] Network Interfaces and IP Configuration:" -ForegroundColor Green
+    $ipconfig = ipconfig /all
+    $ipconfig | ForEach-Object { Write-Host "    $_" }
+}
+
+function Get-ARPTable {
+    Write-Host "`n[+] ARP Table:" -ForegroundColor Green
+    $arp = arp -a
+    $arp | ForEach-Object { Write-Host "    $_" }
+}
+
+function Get-RoutingTable {
+    Write-Host "`n[+] Routing Table:" -ForegroundColor Green
+    $route = route print
+    $route | ForEach-Object { Write-Host "    $_" }
+}
+
+# Security Enumeration Functions
+function Get-SecurityInfo {
+    Write-Log "Checking security controls..."
+    
+    # Check Windows Defender Status
+    Get-DefenderStatus
+    
+    # Check AppLocker Policies
+    Get-AppLockerRules
+    
+    Write-Host "`n"
+}
+
+function Get-DefenderStatus {
+    Write-Host "`n[+] Windows Defender Status:" -ForegroundColor Green
+    
+    try {
+        $defenderStatus = Get-MpComputerStatus -ErrorAction Stop
+        
+        Write-Host "    AntiVirus Enabled     : $($defenderStatus.AntivirusEnabled)"
+        Write-Host "    Real-Time Protection  : $($defenderStatus.RealTimeProtectionEnabled)"
+        Write-Host "    Behavior Monitoring   : $($defenderStatus.BehaviorMonitorEnabled)"
+        Write-Host "    IOAV Protection       : $($defenderStatus.IoavProtectionEnabled)"
+        Write-Host "    OnAccess Protection   : $($defenderStatus.OnAccessProtectionEnabled)"
+        Write-Host "    NIS Enabled           : $($defenderStatus.NISEnabled)"
+        
+        # Check if signatures are recent
+        $signatureAge = $defenderStatus.AntivirusSignatureAge
+        if ($signatureAge -gt 7) {
+            Write-Host "    Signature Age         : $signatureAge days (POSSIBLY OUTDATED)" -ForegroundColor Yellow
+        }
+        else {
+            Write-Host "    Signature Age         : $signatureAge days" -ForegroundColor Green
+        }
+    }
+    catch {
+        Write-Host "    Error retrieving Defender status: $_" -ForegroundColor Red
+    }
+}
+
+function Get-AppLockerRules {
+    Write-Host "`n[+] AppLocker Policy Rules:" -ForegroundColor Green
+    
+    try {
+        # Check if AppLocker is available
+        $appLockerPolicy = Get-AppLockerPolicy -Effective -ErrorAction Stop
+        
+        if ($appLockerPolicy.RuleCollections.Count -eq 0) {
+            Write-Host "    No AppLocker rules found" -ForegroundColor Yellow
+            return
+        }
+        
+        # Display rule collections
+        $ruleCollections = $appLockerPolicy | Select-Object -ExpandProperty RuleCollections
+        
+        foreach ($collection in $ruleCollections) {
+            Write-Host "    Rule Collection: $($collection.GetType().Name)" -ForegroundColor Cyan
+            
+            # Display key properties
+            Write-Host "      Name: $($collection.Name)"
+            Write-Host "      Action: $($collection.Action)"
+            Write-Host "      Description: $($collection.Description)"
+            
+            # Display conditions
+            if ($collection.PathConditions) {
+                Write-Host "      Path Conditions:" -ForegroundColor Gray
+                foreach ($condition in $collection.PathConditions) {
+                    Write-Host "        - $condition"
+                }
+            }
+            
+            if ($collection.PublisherConditions) {
+                Write-Host "      Publisher Conditions:" -ForegroundColor Gray
+                foreach ($condition in $collection.PublisherConditions) {
+                    Write-Host "        - $condition"
+                }
+            }
+            
+            Write-Host ""
+        }
+        
+        # Test common executables against AppLocker policy
+        Write-Host "`n[+] Testing Common Executables Against AppLocker Policy:" -ForegroundColor Green
+        $testPaths = @(
+            "C:\Windows\System32\cmd.exe",
+            "C:\Windows\System32\powershell.exe",
+            "C:\Windows\System32\wscript.exe",
+            "C:\Windows\System32\cscript.exe"
+        )
+        
+        foreach ($path in $testPaths) {
+            if (Test-Path $path) {
+                try {
+                    $result = Get-AppLockerPolicy -Effective | Test-AppLockerPolicy -Path $path -User Everyone
+                    $decision = $result.PolicyDecision
+                    $color = if ($decision -eq "Denied") { "Red" } else { "Green" }
+                    Write-Host "    $path : $decision" -ForegroundColor $color
+                }
+                catch {
+                    Write-Host "    $path : Error testing policy - $_" -ForegroundColor Yellow
+                }
+            }
+        }
+    }
+    catch [System.Management.Automation.CommandNotFoundException] {
+        Write-Host "    AppLocker module not available or not installed" -ForegroundColor Yellow
+    }
+    catch {
+        Write-Host "    Error retrieving AppLocker policy: $_" -ForegroundColor Red
+    }
+}
+
 # Main Execution
 function Start-MagicWinPwn {
     Show-Banner
     Get-SystemInfo
     Get-UserInfo
+    Get-NetworkInfo
+    Get-SecurityInfo
     Write-Log "Enumeration complete."
 }
 
