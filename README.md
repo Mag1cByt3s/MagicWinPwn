@@ -108,13 +108,13 @@ PS C:\Users\htb-student\Desktop> .\MagicWinPwn.ps1
     (https://github.com/Mag1cByt3s/MagicWinPwn)
 
 
-[2025-09-30 13:54:58] Gathering enhanced system information...
+[2025-10-04 01:39:29] Gathering enhanced system information...
 
 [+] Detailed System Information:
     Host Name:                 WINLPE-SRV01
     OS Name:                   Microsoft Windows Server 2016 Standard
     OS Version:                10.0.14393 N/A Build 14393
-    System Boot Time:          9/30/2025, 1:47:48 PM
+    System Boot Time:          10/4/2025, 1:02:12 AM
     System Manufacturer:       VMware, Inc.
     System Model:              VMware7,1
     System Type:               x64-based PC
@@ -216,7 +216,7 @@ PS C:\Users\htb-student\Desktop> .\MagicWinPwn.ps1
     SQL Server 2016 XEvent (13.0.1601.5)
 
 
-[2025-09-30 13:55:26] Enumerating current user information...
+[2025-10-04 01:41:40] Enumerating current user information...
 
 [+] Current User Information:
     Username: WINLPE-SRV01\htb-student
@@ -242,7 +242,7 @@ PS C:\Users\htb-student\Desktop> .\MagicWinPwn.ps1
     SeChangeNotifyPrivilege           | Bypass traverse checking                      | Enabled
 
 
-[2025-09-30 13:55:26] Gathering network information...
+[2025-10-04 01:41:40] Gathering network information...
 
 [+] Network Interfaces and IP Configuration:
 
@@ -259,15 +259,15 @@ PS C:\Users\htb-student\Desktop> .\MagicWinPwn.ps1
 
        Connection-specific DNS Suffix  . :
        Description . . . . . . . . . . . : vmxnet3 Ethernet Adapter
-       Physical Address. . . . . . . . . : 00-50-56-94-9D-E1
+       Physical Address. . . . . . . . . : 00-50-56-94-2F-E6
        DHCP Enabled. . . . . . . . . . . : No
        Autoconfiguration Enabled . . . . : Yes
-       Link-local IPv6 Address . . . . . : fe80::b5a3:a7a6:f420:93d7%2(Preferred)
+       Link-local IPv6 Address . . . . . : fe80::e0b7:e3f5:bc88:ee8a%2(Preferred)
        IPv4 Address. . . . . . . . . . . : 172.16.20.45(Preferred)
        Subnet Mask . . . . . . . . . . . : 255.255.254.0
        Default Gateway . . . . . . . . . : 172.16.20.1
        DHCPv6 IAID . . . . . . . . . . . : 151015510
-       DHCPv6 Client DUID. . . . . . . . : 00-01-00-01-30-6D-FA-57-00-50-56-94-9D-E1
+       DHCPv6 Client DUID. . . . . . . . : 00-01-00-01-30-72-8C-E5-00-50-56-94-2F-E6
        DNS Servers . . . . . . . . . . . : 8.8.8.8
        NetBIOS over Tcpip. . . . . . . . : Enabled
 
@@ -275,23 +275,23 @@ PS C:\Users\htb-student\Desktop> .\MagicWinPwn.ps1
 
        Connection-specific DNS Suffix  . : .htb
        Description . . . . . . . . . . . : vmxnet3 Ethernet Adapter #2
-       Physical Address. . . . . . . . . : 00-50-56-94-96-5A
+       Physical Address. . . . . . . . . : 00-50-56-94-42-D0
        DHCP Enabled. . . . . . . . . . . : Yes
        Autoconfiguration Enabled . . . . : Yes
-       IPv6 Address. . . . . . . . . . . : dead:beef::142(Preferred)
-       Lease Obtained. . . . . . . . . . : Tuesday, September 30, 2025 1:48:00 PM
-       Lease Expires . . . . . . . . . . : Tuesday, September 30, 2025 2:48:00 PM
-       IPv6 Address. . . . . . . . . . . : dead:beef::4c23:ae13:b163:f160(Preferred)
-       Link-local IPv6 Address . . . . . : fe80::4c23:ae13:b163:f160%4(Preferred)
+       IPv6 Address. . . . . . . . . . . : dead:beef::238(Preferred)
+       Lease Obtained. . . . . . . . . . : Saturday, October 4, 2025 1:02:22 AM
+       Lease Expires . . . . . . . . . . : Saturday, October 4, 2025 2:32:22 AM
+       IPv6 Address. . . . . . . . . . . : dead:beef::5535:dafa:33e4:4e80(Preferred)
+       Link-local IPv6 Address . . . . . : fe80::5535:dafa:33e4:4e80%4(Preferred)
        IPv4 Address. . . . . . . . . . . : 10.129.43.43(Preferred)
        Subnet Mask . . . . . . . . . . . : 255.255.0.0
-       Lease Obtained. . . . . . . . . . : Tuesday, September 30, 2025 1:48:00 PM
-       Lease Expires . . . . . . . . . . : Tuesday, September 30, 2025 2:48:00 PM
+       Lease Obtained. . . . . . . . . . : Saturday, October 4, 2025 1:02:22 AM
+       Lease Expires . . . . . . . . . . : Saturday, October 4, 2025 2:32:22 AM
        Default Gateway . . . . . . . . . : fe80::250:56ff:fe94:53e%4
                                            10.129.0.1
        DHCP Server . . . . . . . . . . . : 10.129.0.1
        DHCPv6 IAID . . . . . . . . . . . : 436228182
-       DHCPv6 Client DUID. . . . . . . . : 00-01-00-01-30-6D-FA-57-00-50-56-94-9D-E1
+       DHCPv6 Client DUID. . . . . . . . : 00-01-00-01-30-72-8C-E5-00-50-56-94-2F-E6
        DNS Servers . . . . . . . . . . . : 1.1.1.1
                                            8.8.8.8
        NetBIOS over Tcpip. . . . . . . . : Enabled
@@ -337,7 +337,9 @@ PS C:\Users\htb-student\Desktop> .\MagicWinPwn.ps1
     Interface: 10.129.43.43 --- 0x4
       Internet Address      Physical Address      Type
       10.129.0.1            00-50-56-94-05-3e     dynamic
-      10.129.63.102         00-50-56-94-e4-ef     dynamic
+      10.129.127.67         00-50-56-94-fc-11     dynamic
+      10.129.205.250        00-50-56-94-a9-5c     dynamic
+      10.129.226.32         00-50-56-94-b1-86     dynamic
       10.129.248.226        00-50-56-94-63-af     dynamic
       10.129.255.255        ff-ff-ff-ff-ff-ff     static
       224.0.0.22            01-00-5e-00-00-16     static
@@ -348,8 +350,8 @@ PS C:\Users\htb-student\Desktop> .\MagicWinPwn.ps1
 [+] Routing Table:
     ===========================================================================
     Interface List
-      2...00 50 56 94 9d e1 ......vmxnet3 Ethernet Adapter
-      4...00 50 56 94 96 5a ......vmxnet3 Ethernet Adapter #2
+      2...00 50 56 94 2f e6 ......vmxnet3 Ethernet Adapter
+      4...00 50 56 94 42 d0 ......vmxnet3 Ethernet Adapter #2
       7...00 ff b3 3c cd 5a ......Windscribe VPN
       1...........................Software Loopback Interface 1
       9...00 00 00 00 00 00 00 e0 Microsoft ISATAP Adapter
@@ -390,14 +392,14 @@ PS C:\Users\htb-student\Desktop> .\MagicWinPwn.ps1
       4    271 ::/0                     fe80::250:56ff:fe94:53e
       1    331 ::1/128                  On-link
       4    271 dead:beef::/64           On-link
-      4    271 dead:beef::142/128       On-link
-      4    271 dead:beef::4c23:ae13:b163:f160/128
+      4    271 dead:beef::238/128       On-link
+      4    271 dead:beef::5535:dafa:33e4:4e80/128
                                         On-link
       4    271 fe80::/64                On-link
       2    271 fe80::/64                On-link
-      4    271 fe80::4c23:ae13:b163:f160/128
+      4    271 fe80::5535:dafa:33e4:4e80/128
                                         On-link
-      2    271 fe80::b5a3:a7a6:f420:93d7/128
+      2    271 fe80::e0b7:e3f5:bc88:ee8a/128
                                         On-link
       1    331 ff00::/8                 On-link
       4    271 ff00::/8                 On-link
@@ -406,8 +408,116 @@ PS C:\Users\htb-student\Desktop> .\MagicWinPwn.ps1
     Persistent Routes:
       None
 
+[+] Listening Ports:
+    Proto  Local Address          Process ID  Process Name
+    -----------------------------------------------------
+    TCP     0.0.0.0:21             1976        FileZilla Server
+    TCP     0.0.0.0:80             4           System
+    TCP     0.0.0.0:135            848         svchost
+    TCP     0.0.0.0:445            4           System
+    TCP     0.0.0.0:1433           3300        sqlservr
+    TCP     0.0.0.0:3389           992         svchost
+    TCP     0.0.0.0:5985           4           System
+    TCP     0.0.0.0:8080           2152        Tomcat8
+    TCP     0.0.0.0:47001          4           System
+    TCP     0.0.0.0:49664          552         wininit
+    TCP     0.0.0.0:49665          104         svchost
+    TCP     0.0.0.0:49666          984         svchost
+    TCP     0.0.0.0:49667          2012        spoolsv
+    TCP     0.0.0.0:49668          1840        svchost
+    TCP     0.0.0.0:49669          696         lsass
+    TCP     0.0.0.0:49670          680         services
+    TCP     10.129.43.43:139       4           System
+    TCP     127.0.0.1:14147        1976        FileZilla Server
+    TCP     172.16.20.45:139       4           System
+    TCP     [::]:21                1976        FileZilla Server
+    TCP     [::]:80                4           System
+    TCP     [::]:135               848         svchost
+    TCP     [::]:445               4           System
+    TCP     [::]:1433              3300        sqlservr
+    TCP     [::]:3389              992         svchost
+    TCP     [::]:5985              4           System
+    TCP     [::]:8080              2152        Tomcat8
+    TCP     [::]:47001             4           System
+    TCP     [::]:49664             552         wininit
+    TCP     [::]:49665             104         svchost
+    TCP     [::]:49666             984         svchost
+    TCP     [::]:49667             2012        spoolsv
+    TCP     [::]:49668             1840        svchost
+    TCP     [::]:49669             696         lsass
+    TCP     [::]:49670             680         services
+    TCP     [::1]:14147            1976        FileZilla Server
+[2025-10-04 01:41:41] Enumerating named pipes...
 
-[2025-09-30 13:55:27] Checking security controls...
+[+] Named Pipes:
+    Total Named Pipes Found: 36
+
+    Name
+    ----
+    atsvc
+    Ctx_WinStation_API_service
+    epmapper
+    eventlog
+    InitShutdown
+    lsass
+    LSM_API_service
+    MSSQL$SQLEXPRESS01\sql\query
+    ntsvcs
+    PIPE_EVENTROOT\CIMV2SCM EVENT PROVIDER
+    PSHost.134040389396289317.4548.DefaultAppDomain.powershell
+    PSHost.134040407300663138.6524.DefaultAppDomain.powershell
+    scerpc
+    SessEnvPublicRpc
+    spoolss
+    SQLLocal\SQLEXPRESS01
+    srvsvc
+    TDLN-4520-41
+    TDLN-6076-41
+    TDLN-6304-41
+    TDLN-7704-41
+    TermSrv_API_service
+    trkwks
+    TSVCPIPE-edb8a28f-5e81-4af0-ad53-083633ec493f
+    vgauth-service
+    W32TIME_ALT
+    WindscribeService
+    Winsock2\CatalogChangeListener-228-0
+    Winsock2\CatalogChangeListener-2a8-0
+    Winsock2\CatalogChangeListener-2b8-0
+    Winsock2\CatalogChangeListener-350-0
+    Winsock2\CatalogChangeListener-3d8-0
+    Winsock2\CatalogChangeListener-68-0
+    Winsock2\CatalogChangeListener-730-0
+    Winsock2\CatalogChangeListener-7dc-0
+    wkssvc
+
+[+] Interesting Named Pipes (Potential C2 or Vulnerable Services):
+    [!] atsvc
+    [!] epmapper
+    [!] eventlog
+    [!] lsass
+    [!] ntsvcs
+    [!] PSHost.134040389396289317.4548.DefaultAppDomain.powershell
+    [!] PSHost.134040407300663138.6524.DefaultAppDomain.powershell
+    [!] scerpc
+    [!] spoolss
+    [!] srvsvc
+    [!] trkwks
+    [!] WindscribeService
+    [!] Winsock2\CatalogChangeListener-228-0
+    [!] Winsock2\CatalogChangeListener-2a8-0
+    [!] Winsock2\CatalogChangeListener-2b8-0
+    [!] Winsock2\CatalogChangeListener-350-0
+    [!] Winsock2\CatalogChangeListener-3d8-0
+    [!] Winsock2\CatalogChangeListener-68-0
+    [!] Winsock2\CatalogChangeListener-730-0
+    [!] Winsock2\CatalogChangeListener-7dc-0
+    [!] wkssvc
+
+
+
+
+[2025-10-04 01:41:41] Checking security controls...
 
 [+] Windows Defender Status:
     AntiVirus Enabled     : True
@@ -416,7 +526,7 @@ PS C:\Users\htb-student\Desktop> .\MagicWinPwn.ps1
     IOAV Protection       : False
     OnAccess Protection   : False
     NIS Enabled           : False
-    Signature Age         : 1515 days (POSSIBLY OUTDATED)
+    Signature Age         : 1518 days (POSSIBLY OUTDATED)
 
 [+] Testing Common Executables Against AppLocker Policy:
     C:\Windows\System32\cmd.exe : Denied
@@ -459,139 +569,12 @@ PS C:\Users\htb-student\Desktop> .\MagicWinPwn.ps1
     C:\Windows\System32\WindowsPowerShell\v1.0\powershell_ise.exe : Denied
 
 
-[2025-09-30 13:55:29] Enumerating running processes...
-
-[+] Running Processes:
-    0: System Idle Process
-    4: System
-    340: smss.exe
-    444: csrss.exe
-    548: csrss.exe
-    572: wininit.exe
-    612: winlogon.exe
-    684: services.exe
-    700: lsass.exe
-    788: svchost.exe
-    856: svchost.exe
-    964: svchost.exe
-    972: svchost.exe
-    104: svchost.exe
-    376: svchost.exe
-    448: dwm.exe
-    1052: svchost.exe
-    1084: vm3dservice.exe
-    1140: svchost.exe
-    1192: svchost.exe
-    1432: svchost.exe
-    1472: svchost.exe
-    1812: svchost.exe
-    1904: spoolsv.exe
-    2040: svchost.exe
-    1224: svchost.exe
-    1580: svchost.exe
-    1464: inetinfo.exe
-    2056: sqlwriter.exe
-    2076: svchost.exe
-    2096: WindscribeService.exe
-    2120: svchost.exe
-    2148: vmtoolsd.exe
-    2156: MsMpEng.exe
-    2168: svchost.exe
-    2252: Tomcat8.exe
-    2288: FileZilla Server.exe
-    2364: VGAuthService.exe
-    2408: conhost.exe
-    3384: sqlservr.exe
-    3392: sqlceip.exe
-    3456: dllhost.exe
-    3632: msdtc.exe
-    3660: WmiPrvSE.exe
-    4544: svchost.exe
-    4952: WmiPrvSE.exe
-    5060: RuntimeBroker.exe
-    3808: sihost.exe
-    3812: svchost.exe
-    4716: taskhostw.exe
-    3920: GoogleUpdate.exe
-    5820: ServerManager.exe
-    6080: svchost.exe
-    4808: vm3dservice.exe
-    5876: vmtoolsd.exe
-    5912: FileZilla Server Interface.exe
-    6136: csrss.exe
-    5812: winlogon.exe
-    6164: jusched.exe
-    6200: dwm.exe
-    6568: rdpclip.exe
-        Path: C:\Windows\System32\rdpclip.exe
-        Cmd: rdpclip
-    6604: sihost.exe
-        Path: C:\Windows\system32\sihost.exe
-        Cmd: sihost.exe
-    6612: svchost.exe
-        Path: C:\Windows\system32\svchost.exe
-        Cmd: C:\Windows\system32\svchost.exe -k UnistackSvcGroup
-    6676: taskhostw.exe
-        Path: C:\Windows\system32\taskhostw.exe
-        Cmd: taskhostw.exe {222A245B-E637-4AE9-A93F-A59CA119A75E}
-    6716: RuntimeBroker.exe
-        Path: C:\Windows\System32\RuntimeBroker.exe
-        Cmd: C:\Windows\System32\RuntimeBroker.exe -Embedding
-    7316: vm3dservice.exe
-        Path: C:\Windows\System32\vm3dservice.exe
-        Cmd: "C:\Windows\System32\vm3dservice.exe" -u
-    7544: jusched.exe
-        Path: C:\Program Files (x86)\Common Files\Java\Java Update\jusched.exe
-        Cmd: "C:\Program Files (x86)\Common Files\Java\Java Update\jusched.exe"
-    6240: cmd.exe
-        Path: C:\Windows\system32\cmd.exe
-        Cmd: "C:\Windows\system32\cmd.exe"
-    6708: conhost.exe
-        Path: C:\Windows\system32\conhost.exe
-        Cmd: \??\C:\Windows\system32\conhost.exe 0x4
-    5416: powershell.exe
-        Path: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
-        Cmd: powershell.exe  -ep bypass
-    6480: msiexec.exe
-    5076: WmiApSrv.exe
-    1860: taskhostw.exe
-    3336: taskhostw.exe
-        Path: C:\Windows\system32\taskhostw.exe
-        Cmd: taskhostw.exe
-    7296: GoogleUpdate.exe
-    7096: InstallAgent.exe
-    7756: InstallAgent.exe
-        Path: C:\Windows\System32\InstallAgent.exe
-        Cmd: C:\Windows\System32\InstallAgent.exe -Embedding
-    5668: GoogleUpdate.exe
-    2400: wuapihost.exe
-    2420: WmiPrvSE.exe
-    1208: TrustedInstaller.exe
-    7560: TiWorker.exe
-    3656: explorer.exe
-        Path: C:\Windows\explorer.exe
-        Cmd: explorer.exe
-    7880: explorer.exe
-    6740: ShellExperienceHost.exe
-        Path: C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy\ShellExperienceHost.exe
-        Cmd: "C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy\ShellExperienceHost.exe" -ServerName:App.AppXtk181tbxbce2qsex02s8tw7hfxa9xb3t.mca
-    6736: ShellExperienceHost.exe
-    8032: SearchUI.exe
-        Path: C:\Windows\SystemApps\Microsoft.Windows.Cortana_cw5n1h2txyewy\SearchUI.exe
-        Cmd: "C:\Windows\SystemApps\Microsoft.Windows.Cortana_cw5n1h2txyewy\SearchUI.exe" -ServerName:CortanaUI.AppXa50dqqa5gqv4a428c9y1jjw7m3btvepj.mca
-    6904: SearchUI.exe
-    6724: backgroundTaskHost.exe
-        Path: C:\Windows\system32\backgroundTaskHost.exe
-        Cmd: "C:\Windows\system32\backgroundTaskHost.exe" -ServerName:CortanaUI.AppXy7vb4pc2dr3kc93kfc509b1d0arkfb2x.mca
-    2704: backgroundTaskHost.exe
-
-
-[2025-09-30 13:55:29] Enumerating user and group information...
+[2025-10-04 01:41:43] Enumerating user and group information...
 
 [+] Logged-In Users:
      USERNAME              SESSIONNAME        ID  STATE   IDLE TIME  LOGON TIME
-     sccm_svc              console             1  Active      none   9/30/2025 1:48 PM
-    >htb-student           rdp-tcp#1           2  Active          .  9/30/2025 1:48 PM
+     sccm_svc              console             1  Active      none   10/4/2025 1:02 AM
+    >htb-student           rdp-tcp#0           2  Active          1  10/4/2025 1:04 AM
 
 [+] All Users:
     - Administrator
@@ -647,7 +630,127 @@ PS C:\Users\htb-student\Desktop> .\MagicWinPwn.ps1
     Computer role:                                        SERVER
 
 
-[2025-09-30 13:55:29] Enumeration complete.
+[2025-10-04 01:41:43] Enumerating running processes...
+
+[+] Running Processes:
+    0: System Idle Process
+    4: System
+    332: smss.exe
+    436: csrss.exe
+    544: csrss.exe
+    552: wininit.exe
+    608: winlogon.exe
+    680: services.exe
+    696: lsass.exe
+    788: svchost.exe
+    848: svchost.exe
+    964: dwm.exe
+    984: svchost.exe
+    992: svchost.exe
+    104: svchost.exe
+    316: svchost.exe
+    1052: svchost.exe
+    1088: vm3dservice.exe
+    1120: svchost.exe
+    1188: svchost.exe
+    1428: svchost.exe
+    1480: svchost.exe
+    1840: svchost.exe
+    2012: spoolsv.exe
+    1632: inetinfo.exe
+    1976: FileZilla Server.exe
+    2056: svchost.exe
+    2088: svchost.exe
+    2132: svchost.exe
+    2152: Tomcat8.exe
+    2164: VGAuthService.exe
+    2188: svchost.exe
+    2212: WindscribeService.exe
+    2220: MsMpEng.exe
+    2260: vmtoolsd.exe
+    2276: svchost.exe
+    2284: svchost.exe
+    2304: sqlwriter.exe
+    2468: conhost.exe
+    3300: sqlservr.exe
+    3312: sqlceip.exe
+    3448: dllhost.exe
+    3632: WmiPrvSE.exe
+    3648: msdtc.exe
+    4808: RuntimeBroker.exe
+    4912: sihost.exe
+    4940: svchost.exe
+    5020: GoogleUpdate.exe
+    5060: taskhostw.exe
+    4112: WmiPrvSE.exe
+    5852: ServerManager.exe
+    6124: svchost.exe
+    5892: vm3dservice.exe
+    5948: vmtoolsd.exe
+    5804: FileZilla Server Interface.exe
+    5792: jusched.exe
+    716: csrss.exe
+    856: winlogon.exe
+    1888: dwm.exe
+    5940: rdpclip.exe
+        Path: C:\Windows\System32\rdpclip.exe
+        Cmd: rdpclip
+    4484: sihost.exe
+        Path: C:\Windows\system32\sihost.exe
+        Cmd: sihost.exe
+    4512: svchost.exe
+        Path: C:\Windows\system32\svchost.exe
+        Cmd: C:\Windows\system32\svchost.exe -k UnistackSvcGroup
+    5904: taskhostw.exe
+        Path: C:\Windows\system32\taskhostw.exe
+        Cmd: taskhostw.exe {222A245B-E637-4AE9-A93F-A59CA119A75E}
+    5640: RuntimeBroker.exe
+        Path: C:\Windows\System32\RuntimeBroker.exe
+        Cmd: C:\Windows\System32\RuntimeBroker.exe -Embedding
+    6948: vm3dservice.exe
+        Path: C:\Windows\System32\vm3dservice.exe
+        Cmd: "C:\Windows\System32\vm3dservice.exe" -u
+    7076: jusched.exe
+        Path: C:\Program Files (x86)\Common Files\Java\Java Update\jusched.exe
+        Cmd: "C:\Program Files (x86)\Common Files\Java\Java Update\jusched.exe"
+    6280: cmd.exe
+        Path: C:\Windows\system32\cmd.exe
+        Cmd: "C:\Windows\system32\cmd.exe"
+    6296: conhost.exe
+        Path: C:\Windows\system32\conhost.exe
+        Cmd: \??\C:\Windows\system32\conhost.exe 0x4
+    4548: powershell.exe
+        Path: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+        Cmd: powershell
+    3604: taskhostw.exe
+    4856: svchost.exe
+    7744: dbvis.exe
+        Path: C:\Program Files\DbVisualizer\dbvis.exe
+        Cmd: "C:\Program Files\DbVisualizer\dbvis.exe"
+    6524: powershell.exe
+        Path: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+        Cmd: "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -ep bypass
+    7776: msiexec.exe
+    7704: explorer.exe
+        Path: C:\Windows\explorer.exe
+        Cmd: explorer.exe
+    6304: explorer.exe
+    6076: ShellExperienceHost.exe
+        Path: C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy\ShellExperienceHost.exe
+        Cmd: "C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy\ShellExperienceHost.exe" -ServerName:App.AppXtk181tbxbce2qsex02s8tw7hfxa9xb3t.mca
+    4520: ShellExperienceHost.exe
+    8040: SearchUI.exe
+        Path: C:\Windows\SystemApps\Microsoft.Windows.Cortana_cw5n1h2txyewy\SearchUI.exe
+        Cmd: "C:\Windows\SystemApps\Microsoft.Windows.Cortana_cw5n1h2txyewy\SearchUI.exe" -ServerName:CortanaUI.AppXa50dqqa5gqv4a428c9y1jjw7m3btvepj.mca
+    3344: SearchUI.exe
+    3064: backgroundTaskHost.exe
+        Path: C:\Windows\system32\backgroundTaskHost.exe
+        Cmd: "C:\Windows\system32\backgroundTaskHost.exe" -ServerName:CortanaUI.AppXy7vb4pc2dr3kc93kfc509b1d0arkfb2x.mca
+    6148: backgroundTaskHost.exe
+    5728: WmiPrvSE.exe
+
+
+[2025-10-04 01:41:43] Enumeration complete.
 ```
 
 <br>
