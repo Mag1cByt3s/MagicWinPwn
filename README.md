@@ -39,6 +39,7 @@ powershell -ep bypass -f .\MagicWinPwn.ps1
 - Checks for common misconfigurations and vulnerabilities  
 - Identifies weak permissions, stored credentials, and exploitable services  
 - Enumerates network configuration, ARP table, and routing information  
+- Enumerates named pipes for potential C2 detection and privilege escalation opportunities
 - Checks Windows Defender and AppLocker security controls  
 - Generates structured output for better readability  
 - Lightweight and standalone (No dependencies required)  
@@ -61,7 +62,7 @@ MagicWinPwn automates various **Windows privilege escalation techniques**, inclu
 
 - **Basic System Information** (OS, user privileges, architecture)
 - **User Privileges & Groups** (Identifies admin access & privilege levels)
-- **Network Configuration** (Interfaces, IP addresses, DNS, ARP, routing table, listening ports)
+- **Network Configuration** (Interfaces, IP addresses, DNS, ARP, routing table, listening ports, named pipes)
 - **Security Controls** (Windows Defender status, AppLocker policies)
 - **Service Misconfigurations** (Unquoted service paths, weak permissions)
 - **Scheduled Tasks & Startup Applications** (Auto-elevated execution paths)

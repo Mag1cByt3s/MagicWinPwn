@@ -213,9 +213,12 @@ function Get-NetworkInfo {
     
     # Get Routing Table
     Get-RoutingTable
-
+    
     # Get Listening Ports
     Get-ListeningPorts
+    
+    # Get Named Pipes
+    Get-NamedPipesInfo
     
     Write-Host "`n"
 }
@@ -262,6 +265,73 @@ function Get-ListeningPorts {
     catch {
         Write-Host "    Error retrieving listening ports: $_" -ForegroundColor Red
     }
+}
+
+function Get-NamedPipesInfo {
+    Write-Log "Enumerating named pipes..."
+    
+    Write-Host "`n[+] Named Pipes:" -ForegroundColor Green
+    try {
+        # Get named pipes using Get-ChildItem
+        $pipes = Get-ChildItem "\\.\pipe\" -ErrorAction Stop | Sort-Object Name
+        
+        if ($pipes) {
+            Write-Host "    Total Named Pipes Found: $($pipes.Count)" -ForegroundColor Cyan
+            Write-Host "`n    Name" -ForegroundColor Cyan
+            Write-Host "    ----" -ForegroundColor Cyan
+            
+            # Display pipe names (limiting output to prevent excessive scrolling)
+            $pipes | Select-Object -First 50 | ForEach-Object {
+                Write-Host "    $($_.Name)" -ForegroundColor Gray
+            }
+            
+            if ($pipes.Count -gt 50) {
+                Write-Host "    ... and $($pipes.Count - 50) more pipes" -ForegroundColor Yellow
+                Write-Host "    (Showing first 50 pipes only)" -ForegroundColor Yellow
+            }
+        }
+        else {
+            Write-Host "    No named pipes found" -ForegroundColor Yellow
+        }
+        
+        # Check for interesting/common named pipes that might indicate C2 or vulnerable services
+        Write-Host "`n[+] Interesting Named Pipes (Potential C2 or Vulnerable Services):" -ForegroundColor Green
+        $interestingPipes = $pipes | Where-Object {
+            $_.Name -match "msagent|mojo|winsock|lsass|spoolss|srvsvc|atsvc|epmapper|ntsvcs|scerpc|eventlog|wkssvc|trkwks|vmware|windscribe|cobalt|beacon|posh|powershell"
+        }
+        
+        if ($interestingPipes) {
+            $interestingPipes | ForEach-Object {
+                Write-Host "    [!] $($_.Name)" -ForegroundColor Red
+            }
+        }
+        else {
+            Write-Host "    No obviously interesting named pipes found" -ForegroundColor Gray
+        }
+        
+    }
+    catch {
+        Write-Host "    Error retrieving named pipes: $_" -ForegroundColor Red
+        
+        # Fallback method using .NET
+        Write-Host "`n    Trying alternative enumeration method..." -ForegroundColor Yellow
+        try {
+            $pipeDirectory = New-Object System.IO.DirectoryInfo "\\.\pipe\"
+            $pipes = $pipeDirectory.GetFileSystemInfos() | Sort-Object Name
+            
+            if ($pipes) {
+                Write-Host "    Total Named Pipes Found: $($pipes.Count)" -ForegroundColor Cyan
+                $pipes | Select-Object -First 30 | ForEach-Object {
+                    Write-Host "    $($_.Name)" -ForegroundColor Gray
+                }
+            }
+        }
+        catch {
+            Write-Host "    Failed to enumerate named pipes with alternative method: $_" -ForegroundColor Red
+        }
+    }
+    
+    Write-Host "`n"
 }
 
 # Security Enumeration Functions
@@ -545,8 +615,8 @@ function Start-MagicWinPwn {
     Get-UserInfo
     Get-NetworkInfo
     Get-SecurityInfo
-    Get-ProcessInfo
     Get-UserEnumeration
+    Get-ProcessInfo
     Write-Log "Enumeration complete."
 }
 
