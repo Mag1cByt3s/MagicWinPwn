@@ -15,6 +15,10 @@ To execute **MagicWinPwn** run:
 ```powershell
 powershell -ep bypass -f .\MagicWinPwn.ps1
 ```
+or if the machine has internet access run it directly off github:
+```powershell
+iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/Mag1cByt3s/MagicWinPwn/refs/heads/main/MagicWinPwn.ps1'))
+```
 
 <br>
 

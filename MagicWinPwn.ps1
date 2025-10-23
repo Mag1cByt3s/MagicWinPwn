@@ -42,16 +42,6 @@ function Write-Log {
 }
 
 function Invoke-SafeGCI {
-    <#
-    .SYNOPSIS
-        Safe wrapper around Get-ChildItem that ignores access/IO errors.
-    .PARAMETER Path
-        One or more paths to enumerate.
-    .PARAMETER Include
-        Wildcard patterns to include (like -Include in Get-ChildItem).
-    .PARAMETER Recurse
-        Whether to recurse.
-    #>
     param(
         [Parameter(Mandatory)] [string[]] $Path,
         [string[]] $Include = @(),
@@ -84,6 +74,63 @@ function Format-FindResult {
         Modified = $f.LastWriteTime
     }
 }
+
+# Noisy directories / paths to ignore (regex, case-insensitive)
+$global:MWP_SkipPathRegex = '(?i)(\\Package Cache\\|\\pnacl\\|\\SwReporter\\|\\Safe Browsing\\|\\Code Cache\\|\\cache2\\|\\startupCache\\|\\TileDataLayer\\|\\ConnectedDevicesPlatform\\|\\Windows\\WebCache\\|\\Local\\Microsoft\\Windows\\Explorer\\(iconcache|thumbcache)_|\\AppData\\Local\\Comms\\UnistoreDB\\)'
+
+function Should-SkipPath {
+    param([string]$FullPath)
+    if (-not $FullPath) { return $false }
+    return [bool]($FullPath -match $global:MWP_SkipPathRegex)
+}
+
+# Text-like extensions we actually want to consider
+$global:MWP_TextExt = @(
+    '.txt', '.cfg', '.conf', '.config', '.ini', '.json', '.xml', '.yml', '.yaml',
+    '.ps1', '.psm1', '.psd1', '.bat', '.cmd', '.vbs', '.js', '.ts', '.sql',
+    '.env', '.rdp', '.properties', '.csv', '.tf', '.tfvars'
+)
+
+# Key/cert extensions we still care about even if binary-ish
+$global:MWP_KeyExt = @('.pem', '.pfx', '.p12', '.key', '.crt', '.cer')
+$global:MWP_KeepNames = @('unattend.xml', 'sysprep.xml', 'sysprep.inf', 'web.config',
+    'confCons.xml', 'sitemanager.xml', 'WinSCP.ini', 'applicationhost.config')
+
+function Has-Ext {
+    param([string]$Path, [string[]]$Exts)
+    try {
+        $e = [System.IO.Path]::GetExtension($Path)
+        return ($Exts -contains $e.ToLowerInvariant())
+    }
+    catch { return $false }
+}
+
+function Should-KeepByName {
+    param([System.IO.FileInfo]$f)
+    if (-not $f) { return $false }
+    $name = $f.Name.ToLowerInvariant()
+    if ($global:MWP_KeepNames -contains $name) { return $true }
+    if (Has-Ext -Path $f.FullName -Exts $global:MWP_TextExt) { return $true }
+    if (Has-Ext -Path $f.FullName -Exts $global:MWP_KeyExt) { return $true }
+    # Special key patterns without typical ext
+    if ($name -like 'id_rsa*' -or $name -like 'id_dsa*' -or $name -like '*.ppk') { return $true }
+    return $false
+}
+
+function Is-ProbablyBinary {
+    param([System.IO.FileInfo]$f, [int]$ProbeBytes = 2048)
+    try {
+        $fs = [System.IO.File]::Open($f.FullName, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+        $buf = New-Object byte[] ($ProbeBytes)
+        $read = $fs.Read($buf, 0, $buf.Length)
+        $fs.Dispose()
+        # Heuristic: contains NUL byte -> binary
+        for ($i = 0; $i -lt $read; $i++) { if ($buf[$i] -eq 0) { return $true } }
+        return $false
+    }
+    catch { return $false }
+}
+
 
 
 # =========================
@@ -663,18 +710,6 @@ function Get-PasswordPolicy {
 }
 
 function Get-InterestingFiles {
-    <#
-    .SYNOPSIS
-        Hunt for interesting files and obvious secrets on Windows systems.
-    .DESCRIPTION
-        Quick, high-signal scan of common user/app/system locations (fast).
-        Optional -Deep mode walks all fixed drives (slower, capped output).
-        Also checks a set of high-value files for existence + readability.
-    .PARAMETER Deep
-        Sweep all fixed drives for filename patterns (slower).
-    .PARAMETER MaxContentKB
-        Max file size for content scanning (defaults to 5120 KB).
-    #>
     param(
         [switch] $Deep,
         [int]    $MaxContentKB = 5120
@@ -690,7 +725,7 @@ function Get-InterestingFiles {
         "$env:PROGRAMDATA",
         "C:\Users\Public\Documents",
         "C:\inetpub\wwwroot",
-        "C:\Windows\Panther",                                   # unattend.xml, setup logs
+        "C:\Windows\Panther",
         "C:\Windows\System32\sysprep",
         "C:\Windows\System32\config",
         "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Config"
@@ -698,35 +733,34 @@ function Get-InterestingFiles {
 
     # App-specific hot spots
     $appPaths = @(
-        "$env:APPDATA\mRemoteNG",                               # confCons.xml
-        "$env:APPDATA\FileZilla",                               # sitemanager.xml
-        "$env:APPDATA\WinSCP",                                  # WinSCP.ini
-        "$env:APPDATA\Microsoft\Credentials",                   # DPAPI creds
+        "$env:APPDATA\mRemoteNG",
+        "$env:APPDATA\FileZilla",
+        "$env:APPDATA\WinSCP",
+        "$env:APPDATA\Microsoft\Credentials",
         "$env:LOCALAPPDATA\Microsoft\Credentials",
-        "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine"  # ConsoleHost_history.txt
+        "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine"
     )
 
-    # Filenames/extensions that often hold creds/config
+    # Filename patterns (kept same breadth) — but filtered by extension/skip rules
     $lootPatterns = @(
-        # generic creds/config
-        "unattend.xml", "sysprep.inf", "sysprep.xml", "web.config", "applicationhost.config",
-        "*pass*.txt", "*pass*.cfg", "*cred*.xml", "*cred*.txt", "*secret*.txt", "*token*.txt", "*vault*.json",
-        "*connectionstring*", "*.config", "*.ini", "*.json", ".env", ".env.*",
-        # tools & apps
-        "confCons.xml", "sitemanager.xml", "recentservers.xml", "WinSCP.ini", "*.rdp", "*.vnc", "*.kdbx", "*.ppk",
-        # keys & certs
-        "id_rsa*", "id_dsa*", "*.pem", "*.pfx", "*.p12", "*.key", "*.crt", "*.cer",
-        # scripts & IaC (often embed secrets)
-        "*.ps1", "*.psm1", "*.bat", "*.cmd", "*.vbs", "*.js", "*.psd1", "Dockerfile", "docker-compose*.yml", "*.tfvars", "*.tf", "*.yml", "*.yaml"
+        'unattend.xml', 'sysprep.inf', 'sysprep.xml', 'web.config', 'applicationhost.config',
+        '*pass*.txt', '*pass*.cfg', '*cred*.xml', '*cred*.txt', '*secret*.txt', '*token*.txt', '*vault*.json',
+        '*connectionstring*', '*.config', '*.ini', '*.json', '.env', '.env.*',
+        'confCons.xml', 'sitemanager.xml', 'recentservers.xml', 'WinSCP.ini', '*.rdp', '*.vnc', '*.kdbx', '*.ppk',
+        'id_rsa*', 'id_dsa*', '*.pem', '*.pfx', '*.p12', '*.key', '*.crt', '*.cer',
+        '*.ps1', '*.psm1', '*.bat', '*.cmd', '*.vbs', '*.js', '*.psd1', 'Dockerfile', 'docker-compose*.yml', '*.tfvars', '*.tf', '*.yml', '*.yaml'
     )
 
     # Content regex for obvious secrets (case-insensitive)
     $contentRegex = '(?i)\b(password|passwd|pwd|token|apikey|api_key|secret|connectionstring|conn\s*str|client_secret|access_key_id|secret_access_key|bearer\s+[A-Za-z0-9\-\._]+)\b'
 
-    # ---- 1) Quick filename hits -------------------------------------------
+    # ---- 1) Quick filename hits (with noise suppression) -------------------
     Write-Host "`n[+] Interesting Files (quick scan):" -ForegroundColor Green
     $hits = New-Object System.Collections.Generic.List[object]
+
     Invoke-SafeGCI -Path ($quickPaths + $appPaths) -Include $lootPatterns -Recurse |
+    Where-Object { -not (Should-SkipPath -FullPath $_.FullName) } |
+    Where-Object { Should-KeepByName -f $_ } |
     ForEach-Object { $hits.Add((Format-FindResult $_)) }
 
     if ($hits.Count -gt 0) {
@@ -742,15 +776,20 @@ function Get-InterestingFiles {
         Write-Host "    No filename pattern matches found in quick paths." -ForegroundColor DarkGray
     }
 
-    # ---- 2) Quick content scan (size-bounded) ------------------------------
+    # ---- 2) Quick content scan (size-bounded, text-like only, skip noisy) --
     Write-Host "`n[+] Interesting Content (keyword hits):" -ForegroundColor Green
     $contentCandidates =
     Invoke-SafeGCI -Path ($quickPaths + $appPaths) -Recurse |
-    Where-Object { $_.Length -le ($MaxContentKB * 1KB) }
+    Where-Object {
+        -not (Should-SkipPath -FullPath $_.FullName) -and
+        $_.Length -le ($MaxContentKB * 1KB) -and
+        (Has-Ext -Path $_.FullName -Exts $global:MWP_TextExt)
+    }
 
     $contentFinds = 0
     foreach ($f in $contentCandidates) {
         try {
+            if (Is-ProbablyBinary -f $f) { continue }
             $m = Select-String -LiteralPath $f.FullName -Pattern $contentRegex -ErrorAction SilentlyContinue -List
             if ($m) {
                 $contentFinds++
@@ -758,7 +797,7 @@ function Get-InterestingFiles {
             }
         }
         catch { }
-        if ($contentFinds -ge 60) { break } # keep output sane
+        if ($contentFinds -ge 60) { break }
     }
     if ($contentFinds -eq 0) {
         Write-Host "    No obvious secrets found in content (quick scan)." -ForegroundColor DarkGray
@@ -771,9 +810,10 @@ function Get-InterestingFiles {
         foreach ($root in $roots) {
             Write-Host "    -> $root" -ForegroundColor Cyan
             Invoke-SafeGCI -Path $root -Include $lootPatterns -Recurse |
-            Select-Object -First 150 | ForEach-Object {
-                Write-Host ("       {0}" -f $_.FullName) -ForegroundColor Gray
-            }
+            Where-Object { -not (Should-SkipPath -FullPath $_.FullName) } |
+            Where-Object { Should-KeepByName -f $_ } |
+            Select-Object -First 150 |
+            ForEach-Object { Write-Host ("       {0}" -f $_.FullName) -ForegroundColor Gray }
         }
     }
 
@@ -782,8 +822,8 @@ function Get-InterestingFiles {
 
     $WIN = $env:WINDIR
     $highValueFiles = @(
-        "C:\inetpub\wwwroot\web.config",                 # common
-        "C:\inetpub\wwwwroot\web.config",                # typo variant (requested)
+        "C:\inetpub\wwwroot\web.config",
+        "C:\inetpub\wwwwroot\web.config",
         (Join-Path $WIN "repair\sam"),
         (Join-Path $WIN "repair\system"),
         (Join-Path $WIN "repair\software"),
@@ -811,7 +851,6 @@ function Get-InterestingFiles {
             }
         }
         catch { }
-
         $color = if ($readable) { 'Green' } elseif ($exists) { 'Yellow' } else { 'DarkGray' }
         $existsStr = if ($exists) { 'True ' } else { 'False' }
         $readableStr = if ($readable) { 'True     ' } else { 'False    ' }
