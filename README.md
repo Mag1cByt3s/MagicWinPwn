@@ -49,6 +49,7 @@ powershell -ep bypass -f .\MagicWinPwn.ps1
 - Enumerates logged-in users, all local users, and groups
 - Retrieves password policy and account information
 - Identifies installed software through multiple methods
+- Interesting Files Hunter
 
 <br>
 
@@ -73,6 +74,7 @@ MagicWinPwn automates various **Windows privilege escalation techniques**, inclu
 - **Process Enumeration** (Running processes with full paths and command lines)
 - **User & Group Enumeration** (All users, groups, password policies, logged-in users)
 - **PATH Analysis** (Identifies writable directories in system PATH)
+- **Interesting Files & Secrets** (Quick hits on IIS/web configs, `%WINDIR%\repair\*`, `%WINDIR%\system32\config\*.sav`/`SecEvent.Evt`, app hot spots like mRemoteNG/FileZilla/WinSCP/PSReadLine; optional `-Deep` filename/content sweep for common secrets)
 
 <br>
 
