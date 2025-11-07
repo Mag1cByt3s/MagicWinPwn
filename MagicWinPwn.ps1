@@ -728,7 +728,8 @@ function Get-InterestingFiles {
         "C:\Windows\Panther",
         "C:\Windows\System32\sysprep",
         "C:\Windows\System32\config",
-        "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Config"
+        "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Config",
+        "C:\Scripts"
     )
 
     # App-specific hot spots
