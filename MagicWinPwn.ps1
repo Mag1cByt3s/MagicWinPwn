@@ -131,6 +131,106 @@ function Is-ProbablyBinary {
     catch { return $false }
 }
 
+function Get-CredCandidatePaths {
+    # Collect user profile roots (handles multiple users)
+    $userRoots = @()
+    try {
+        $userRoots = Get-ChildItem 'C:\Users' -Directory -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -notin @('All Users', 'Default', 'Default User') }
+    }
+    catch { }
+
+    $paths = New-Object System.Collections.Generic.List[string]
+
+    # Per-user hot spots
+    foreach ($u in $userRoots) {
+        $up = $u.FullName
+        $paths.AddRange(@(
+                # General docs/working dirs
+                Join-Path $up 'Desktop'
+                Join-Path $up 'Documents'
+                Join-Path $up 'Downloads'
+
+                # AppData – roaming/local
+                Join-Path $up 'AppData\Roaming'
+                Join-Path $up 'AppData\Local'
+
+                # Shell & history
+                Join-Path $up 'AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine'   # ConsoleHost_history.txt
+                Join-Path $up 'AppData\Roaming\Code\User'                                 # VSCode settings/keybindings/snippets
+                Join-Path $up 'AppData\Roaming\Code\User\globalStorage'
+
+                # Credentials & DPAPI
+                Join-Path $up 'AppData\Roaming\Microsoft\Credentials'
+                Join-Path $up 'AppData\Local\Microsoft\Credentials'
+                Join-Path $up 'AppData\Roaming\Microsoft\Protect'
+                Join-Path $up 'AppData\Local\Microsoft\Protect'
+
+                # Remote access / managers
+                Join-Path $up 'AppData\Roaming\WinSCP'
+                Join-Path $up 'AppData\Roaming\mRemoteNG'
+                Join-Path $up 'AppData\Roaming\FileZilla'
+                Join-Path $up 'Documents\mRemoteNG'
+                Join-Path $up 'Documents\Royal TS'
+                Join-Path $up 'Documents\Remote Desktop Files'
+                Join-Path $up 'AppData\Local\Microsoft\RemoteDesktop'
+                Join-Path $up 'AppData\Roaming\Microsoft\Remote Desktop'
+                Join-Path $up 'AppData\Roaming\Microsoft\Terminal Services Client\Cache'  # RDP cache (hashes of hosts)
+
+                # Databases & dev GUIs
+                Join-Path $up 'AppData\Roaming\HeidiSQL'
+                Join-Path $up 'AppData\Roaming\DBeaverData'
+                Join-Path $up 'AppData\Roaming\DbVisualizer'
+                Join-Path $up 'AppData\Roaming\pgAdmin'
+                Join-Path $up 'AppData\Roaming\SQL Developer'
+
+                # Cloud/Dev tooling creds
+                Join-Path $up '.ssh'
+                Join-Path $up '.aws'
+                Join-Path $up '.azure'
+                Join-Path $up '.config\gcloud'
+                Join-Path $up '.docker'
+                Join-Path $up '.kube'
+                Join-Path $up '.npmrc'
+                Join-Path $up '.pypirc'
+                Join-Path $up '.git-credentials'
+                Join-Path $up '.terraform.d'
+                Join-Path $up 'AppData\Roaming\JetBrains'         # IDEs holding DB/cxn secrets
+                Join-Path $up 'AppData\Roaming\Postman'           # environments/collections
+                Join-Path $up 'AppData\Roaming\Insomnia'          # REST client
+            ))
+    }
+
+    # System / app-level hot spots
+    $paths.AddRange(@(
+            'C:\ProgramData'                                      # many apps stash config here
+            'C:\ProgramData\ssh'                                  # OpenSSH server/client keys
+            'C:\ProgramData\OpenSSH'
+            'C:\ProgramData\OpenVPN\config'
+            'C:\ProgramData\chocolatey'
+            'C:\ProgramData\Docker\config'
+            'C:\ProgramData\Jenkins\.jenkins'
+            'C:\GitLab-Runner'                                    # tokens/config.toml
+            'C:\Windows\System32\inetsrv\config'                  # applicationHost.config
+            'C:\inetpub\wwwroot'
+            'C:\Windows\Panther'
+            'C:\Windows\System32\sysprep'
+            'C:\Windows\System32\config'
+            'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Config'
+            'C:\Oracle'                                           # tnsnames.ora, sqlnet.ora
+            'C:\Program Files\PostgreSQL'                         # pgpass.conf (varies)
+            'C:\Program Files\MySQL'
+            'C:\Program Files (x86)\HeidiSQL'
+            'C:\Program Files\DBeaver'
+            'C:\Program Files\DbVisualizer'
+            'C:\Scripts'                                          # orgs often stash stuff here
+        ))
+
+    # Return only paths that exist to keep traversal tight
+    return $paths | Where-Object { Test-Path -LiteralPath $_ -ErrorAction SilentlyContinue } | Select-Object -Unique
+}
+
+
 
 
 # =========================
@@ -709,38 +809,29 @@ function Get-PasswordPolicy {
     }
 }
 
+
+
 function Get-InterestingFiles {
     param(
         [switch] $Deep,
         [int]    $MaxContentKB = 5120
     )
 
-    # ---- Targeted directories (fast) ----
-    $quickPaths = @(
-        "$env:USERPROFILE\Desktop",
-        "$env:USERPROFILE\Documents",
-        "$env:USERPROFILE\Downloads",
-        "$env:USERPROFILE\AppData\Roaming",
-        "$env:USERPROFILE\AppData\Local",
-        "$env:PROGRAMDATA",
-        "C:\Users\Public\Documents",
-        "C:\inetpub\wwwroot",
-        "C:\Windows\Panther",
-        "C:\Windows\System32\sysprep",
-        "C:\Windows\System32\config",
-        "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Config",
-        "C:\Scripts"
-    )
+    # ---- Build richer target set across all user profiles + system hot spots ----
+    $candidatePaths = Get-CredCandidatePaths
 
-    # App-specific hot spots
-    $appPaths = @(
+    # Keep a few per-user tool folders if they exist (sometimes not covered by profile scan)
+    $appSpecific = @(
+        "$env:APPDATA\WinSCP",
         "$env:APPDATA\mRemoteNG",
         "$env:APPDATA\FileZilla",
-        "$env:APPDATA\WinSCP",
         "$env:APPDATA\Microsoft\Credentials",
         "$env:LOCALAPPDATA\Microsoft\Credentials",
         "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine"
-    )
+    ) | Where-Object { Test-Path -LiteralPath $_ -ErrorAction SilentlyContinue }
+
+    # Final targets (include your org’s stash dir too)
+    $quickPaths = ($candidatePaths + $appSpecific + @('C:\Scripts')) | Select-Object -Unique
 
     # Filename patterns (kept same breadth) — but filtered by extension/skip rules
     $lootPatterns = @(
@@ -758,7 +849,7 @@ function Get-InterestingFiles {
         '*vault*.json',
         '*connectionstring*',
         '*.config',
-        '*.conf'
+        '*.conf',
         '*.ini',
         '*.json',
         '.env',
@@ -803,7 +894,7 @@ function Get-InterestingFiles {
     Write-Host "`n[+] Interesting Files (quick scan):" -ForegroundColor Green
     $hits = New-Object System.Collections.Generic.List[object]
 
-    Invoke-SafeGCI -Path ($quickPaths + $appPaths) -Include $lootPatterns -Recurse |
+    Invoke-SafeGCI -Path $quickPaths -Include $lootPatterns -Recurse |
     Where-Object { -not (Should-SkipPath -FullPath $_.FullName) } |
     Where-Object { Should-KeepByName -f $_ } |
     ForEach-Object { $hits.Add((Format-FindResult $_)) }
@@ -824,7 +915,7 @@ function Get-InterestingFiles {
     # ---- 2) Quick content scan (size-bounded, text-like only, skip noisy) --
     Write-Host "`n[+] Interesting Content (keyword hits):" -ForegroundColor Green
     $contentCandidates =
-    Invoke-SafeGCI -Path ($quickPaths + $appPaths) -Recurse |
+    Invoke-SafeGCI -Path $quickPaths -Recurse |
     Where-Object {
         -not (Should-SkipPath -FullPath $_.FullName) -and
         $_.Length -le ($MaxContentKB * 1KB) -and
