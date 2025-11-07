@@ -743,16 +743,60 @@ function Get-InterestingFiles {
 
     # Filename patterns (kept same breadth) — but filtered by extension/skip rules
     $lootPatterns = @(
-        'unattend.xml', 'sysprep.inf', 'sysprep.xml', 'web.config', 'applicationhost.config',
-        '*pass*.txt', '*pass*.cfg', '*cred*.xml', '*cred*.txt', '*secret*.txt', '*token*.txt', '*vault*.json',
-        '*connectionstring*', '*.config', '*.ini', '*.json', '.env', '.env.*',
-        'confCons.xml', 'sitemanager.xml', 'recentservers.xml', 'WinSCP.ini', '*.rdp', '*.vnc', '*.kdbx', '*.ppk',
-        'id_rsa*', 'id_dsa*', '*.pem', '*.pfx', '*.p12', '*.key', '*.crt', '*.cer',
-        '*.ps1', '*.psm1', '*.bat', '*.cmd', '*.vbs', '*.js', '*.psd1', 'Dockerfile', 'docker-compose*.yml', '*.tfvars', '*.tf', '*.yml', '*.yaml'
+        'unattend.xml',
+        'sysprep.inf',
+        'sysprep.xml',
+        'web.config',
+        'applicationhost.config',
+        '*pass*.txt',
+        '*pass*.cfg',
+        '*cred*.xml',
+        '*cred*.txt',
+        '*secret*.txt',
+        '*token*.txt',
+        '*vault*.json',
+        '*connectionstring*',
+        '*.config',
+        '*.conf'
+        '*.ini',
+        '*.json',
+        '.env',
+        '.env.*',
+        'confCons.xml',
+        'sitemanager.xml',
+        'recentservers.xml',
+        'WinSCP.ini',
+        '*.rdp',
+        '*.vnc',
+        '*.kdbx',
+        '*.ppk',
+        'id_rsa*',
+        'id_dsa*',
+        '*.pem',
+        '*.pfx',
+        '*.p12',
+        '*.key',
+        '*.crt',
+        '*.cer',
+        '*.ps1',
+        '*.psm1',
+        '*.bat',
+        '*.cmd',
+        '*.vbs',
+        '*.js',
+        '*.psd1',
+        'Dockerfile',
+        'docker-compose*.yml',
+        '*.tfvars',
+        '*.tf',
+        '*.yml',
+        '*.yaml',
+        '*.xml',
+        '*.ods'
     )
 
     # Content regex for obvious secrets (case-insensitive)
-    $contentRegex = '(?i)\b(password|passwd|pwd|token|apikey|api_key|secret|connectionstring|conn\s*str|client_secret|access_key_id|secret_access_key|bearer\s+[A-Za-z0-9\-\._]+)\b'
+    $contentRegex = '(?i)\b(password|passwd|pwd|token|apikey|api_key|secret|cred|credential|connectionstring|conn\s*str|client_secret|access_key_id|secret_access_key|bearer\s+[A-Za-z0-9\-\._]+)\b'
 
     # ---- 1) Quick filename hits (with noise suppression) -------------------
     Write-Host "`n[+] Interesting Files (quick scan):" -ForegroundColor Green
